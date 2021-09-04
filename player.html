@@ -5,50 +5,59 @@
     <meta charset="utf-8">
     <title>HTTP-FLV Live Stream Player</title>
     <style>
-        .video {
+        body {
+            padding: 8px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #live {
             width: 100%;
             margin-left: auto;
             margin-right: auto;
-            margin-top: auto;
             outline: none;
         }
 
         .input {
-            width: 50%;
+            width: 80%;
             margin-left: auto;
             margin-right: auto;
             text-align: center;
             margin-top: 16px;
         }
 
-        .center {
+        #source {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .button {
             text-align: center;
             margin-top: 16px;
         }
     </style>
 
-    <script src="./flvjs/flv.min.js"></script>
     <link href="./mdc/material-components-web.min.css" rel="stylesheet">
     <script src="./mdc/material-components-web.min.js"></script>
+    <script src="./flvjs/flv.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 
 <body onload="init()">
-    <video id="live" class="video" controls autoplay></video>
+    <video id="live" controls></video>
 
     <div class="input">
         <label class="mdc-text-field mdc-text-field--filled" id='source'>
             <span class="mdc-text-field__ripple"></span>
-            <span class="mdc-floating-label" id="my-label-id">Stream Address</span>
+            <span class="mdc-floating-label" id="my-label-id">Stream address</span>
             <input class="mdc-text-field__input" type="text" aria-labelledby="my-label-id">
             <span class="mdc-line-ripple"></span>
         </label>
     </div>
 
-    <div class="center">
+    <div class="button">
         <button class="mdc-button mdc-button--raised" onclick="play()" id="play">
             <span class="mdc-button__ripple"></span>
-            <i class="material-icons mdc-button__icon" aria-hidden="true">send</i>
+            <i class="material-icons mdc-button__icon" aria-hidden="true">play_arrow</i>
             <span class="mdc-button__label">Play</span>
         </button>
     </div>
@@ -58,29 +67,37 @@
 
 <script>
     function init() {
+        if (!flvjs.isSupported()) {
+            var err_msg = '<p>Your browser does not support FLV.js</p>';
+            document.getElementsByClassName('input')[0].innerHTML = err_msg;
+            var button = document.getElementsByClassName('button')[0];
+            button.parentNode.removeChild(button);
+            return;
+        }
+
         mdc.ripple.MDCRipple.attachTo(document.getElementById('play'));
         mdc.textField.MDCTextField.attachTo(document.getElementById('source'));
-        var input = document.getElementById("source");
-        input.addEventListener("keyup", function (event) {
+
+        // Press enter to play
+        var input = document.getElementById('source');
+        input.addEventListener('keyup', function (event) {
             event.preventDefault();
             if (event.keyCode === 13) {
-                document.getElementById("play").click();
+                document.getElementById('play').click();
             }
         });
     }
 
     function play() {
-        if (flvjs.isSupported()) {
-            url = mdc.textField.MDCTextField.attachTo(document.getElementById('source')).value
-            var live = document.getElementById('live');
-            var player = flvjs.createPlayer({
-                type: 'flv',
-                isLive: true,
-                url: url
-            });
-            player.attachMediaElement(live);
-            player.load();
-            player.play();
-        }
+        url = mdc.textField.MDCTextField.attachTo(document.getElementById('source')).value;
+        var live = document.getElementById('live');
+        var player = flvjs.createPlayer({
+            type: 'flv',
+            isLive: true,
+            url: url
+        });
+        player.attachMediaElement(live);
+        player.load();
+        player.play();
     }
 </script>
